@@ -1,0 +1,34 @@
+# Template file for 'minecraft-launcher'
+pkgname=minecraft-launcher
+version=2.1.5965
+revision=1
+wrksrc=${pkgname}
+depends="GConf alsa-lib gtk+ libX11 libXScrnSaver libXtst libxcb nss xrandr"
+short_desc="Modern electron-based launcher for the famous Minecraft game"
+maintainer="Caleb JA <skywise@tutanota.de>"
+license="Propietary"
+homepage="https://www.minecraft.net/"
+distfiles="https://launcher.mojang.com/download/linux/x86_64/minecraft-launcher_${version}.tar.gz"
+checksum=85a0a2478861c3e660a1273f6b6ac2e14232ae439cd6d6172391065274228c72
+repository=nonfree
+nostrip=yes
+
+pre_build() {
+    	# Remove the strip wrapper
+	rm -f "${XBPS_WRAPPERDIR}"/strip
+}
+
+do_install() {
+	vmkdir /usr/share/applications
+	vcopy "${FILESDIR}"/minecraft-launcher.desktop /usr/share/applications/minecraft-launcher.desktop
+	vmkdir /usr/share/icons/hicolor/symbolic/apps
+	vcopy "${FILESDIR}"/minecraft-launcher.svg /usr/share/icons/hicolor/symbolic/apps/minecraft-launcher.svg
+
+	vmkdir /opt
+	vcopy ../minecraft-launcher /opt/"${pkgname}"
+	rm -rf "${DESTDIR}/opt/$pkgname/lib/"
+	rm -rf "${DESTDIR}/opt/$pkgname/include/"
+
+	vmkdir /usr/bin
+	ln -s "/opt/${pkgname}/${pkgname}" "${DESTDIR}/usr/bin/$pkgname"
+}

@@ -1,0 +1,54 @@
+# Template file for 'ripcord'
+pkgname=ripcord
+version=0.4.19
+revision=1
+wrksrc=${pkgname}
+depends="harfbuzz libGL"
+short_desc="Qt-based Discord and Slack client"
+maintainer="Yusuf Bera Ertan <y.bera003.06@protonmail.com>"
+license="custom: Proprietary license"
+homepage="https://cancel.fm/ripcord"
+_file="Ripcord-${version}-x86_64.AppImage"
+checksum=725ef9458c8854fb236bba1ac9013cc186b1a4418100db905e337b0bc8597d72
+repository=nonfree
+archs=x86_64
+nostrip=yes
+
+pre_build() {
+	# Remove the strip wrapper
+	rm -f "${XBPS_WRAPPERDIR}"/strip
+}
+
+do_fetch() {
+	$XBPS_FETCH_CMD "https://cancel.fm/dl/${_file}"
+}
+
+do_extract() {
+	# Extract AppImage
+	chmod +x "${XBPS_BUILDDIR}/${_file}"
+	"${XBPS_BUILDDIR}/${_file}" --appimage-extract &>/dev/null
+}
+
+do_install() {
+	# directories
+  	vmkdir usr/bin
+  	vmkdir usr/lib/ripcord
+	vmkdir usr/share/applications
+  	vmkdir usr/share/icons
+  	vmkdir usr/share/licenses/"${pkgname}"
+  
+  	# icon
+  	vinstall squashfs-root/Ripcord_Icon.png 644 usr/share/icons/
+  
+  	# .desktop file
+  	sed -i 's/Exec=Ripcord/Exec=\/usr\/bin\/ripcord/' squashfs-root/Ripcord.desktop
+  	vinstall squashfs-root/Ripcord.desktop 644 usr/share/applications
+
+  	# license
+  	#vlicense LICENSE
+
+  	# application
+  	chmod 755 -R squashfs-root
+  	vcopy squashfs-root/* usr/lib/ripcord/
+  	ln -s /usr/lib/ripcord/Ripcord "${DESTDIR}"/usr/bin/ripcord
+}
